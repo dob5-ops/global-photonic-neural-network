@@ -1,0 +1,800 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{siunitx}
+
+\sisetup{detect-weight=true}
+
+\title{\textbf{Building the AI We Actually Need}\\[6pt]
+\large A Global Photonic Network for Cooperative, Problem-Focused Development}
+
+\author{%
+  David O'Brien\thanks{Corresponding author. Affiliated with the Georgia Tech
+  AI Safety Initiative (AISI). A working pre-print circulated for feedback and
+  collaboration. Drafting and synthesis assistance from a large language model
+  (Anthropic Claude); all claims and errors are the author's responsibility.}\\
+  \small Georgia Tech AI Safety Initiative (AISI)
+}
+
+\date{Version 0.4 --- \today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Powerful AI will almost certainly be built. The question is whether it
+will emerge from a competitive race---with resources wasted on redundancy,
+secrecy, and mutual defensive positioning---or from a cooperative effort pooling
+human and computational resources toward actually \emph{solving problems}.
+\par
+Until now, the bottleneck preventing planetary-scale cooperation was physical:
+moving neural network activations between distant compute sites consumed more
+energy and latency than made global pooling practical. That bottleneck is now
+removable. This paper proposes a global photonic transport fabric---built on
+existing fiber infrastructure---that solves the data-movement problem. With it
+solved, a single, globally distributed AI system becomes not a distant hope but
+an engineering project: the fastest way to frontier capability, the least
+wasteful deployment of human and computational effort, and the configuration
+most able to actually help with the problems that matter---climate, disease,
+energy, scientific discovery, human flourishing.
+\par
+We show that the technical barrier has no unsolved problems: every component
+exists as a commercial product or mature prototype. We give a proposal-depth
+architecture, performance estimates, a realistic three-phase roadmap (Phase~1 in
+2--3 years, \$35--50M), and the concrete mechanisms that would keep cooperation
+stable and prevent capture. We address this to builders, researchers, and the
+institutions that fund them: not as a moral appeal, but as the engineering path
+that is simultaneously the fastest, the least wasteful, and the most useful.
+
+\vspace{8pt}
+\noindent\textbf{Keywords:} cooperative AI development, distributed compute,
+photonic transport, data-center interconnects, global infrastructure, problem-solving
+capability, resource efficiency.
+\end{abstract}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+% ======================================================================
+\section{Why We Should Want to Build This Together}
+\label{sec:why}
+
+\subsection{The race is expensive and slow}
+
+Today, frontier AI development is driven by competition. Multiple labs, multiple
+firms, multiple nations are racing to build capable systems. This is
+extraordinarily wasteful:
+
+\begin{itemize}[leftmargin=1.6em,itemsep=4pt]
+  \item \textbf{Redundant effort.} Teams solve the same problems in parallel,
+  independently, without learning from each other. The compute spent on solving
+  training techniques twice, three times, four times over is compute not spent
+  on making systems safer, more capable, or more useful.
+  \item \textbf{Secrecy overhead.} Each lab hoards insights, methods, even
+  infrastructure designs. The tax of not sharing is enormous: algorithms,
+  hardware designs, and datasets that could be public knowledge are kept private.
+  \item \textbf{Defensive positioning.} Resources are diverted into securing
+  talent, locking down supply chains, and positioning for advantage against
+  rivals. In the worst case, safety work is deferred because a lab fears being
+  overtaken. In the best case, it's just inefficient.
+  \item \textbf{Fragmentation of compute.} No single actor can pool all
+  available compute. Each builds their own stack in isolation. The result is
+  that we have many smaller systems rather than one larger one---and smaller
+  systems are slower to solve hard problems.
+\end{itemize}
+
+\noindent By contrast, a cooperative effort would:
+\begin{itemize}[leftmargin=1.6em,itemsep=4pt]
+  \item Pool all available compute and talent into one focused effort.
+  \item Eliminate redundancy: solve problems once, share solutions immediately.
+  \item Enable transparency and openness at every stage, speeding iteration and
+  learning.
+  \item Concentrate resources on what matters: capability and useful application,
+  not competitive positioning.
+\end{itemize}
+
+\subsection{The most powerful system is a cooperative one}
+
+There is a simple arithmetic here. Frontier capability scales with compute. The
+most powerful system we can build is therefore the one that aggregates the most
+compute. No single firm, lab, or nation controls all the compute that matters.
+A coalition of all of them does.
+
+\textbf{Hence: the fastest path to the most capable AI is a cooperative global
+effort.} Not because cooperation is virtuous, but because it is the only way to
+aggregate enough resources to win.
+
+\subsection{Cooperation enables the safety budget we actually need}
+
+There is a secondary but crucial point. A system built in a race must ship when
+it is competitive---that is, as soon as it is better than rivals. There is no
+margin for extra time spent on alignment, on testing, on building in
+interpretability and safeguards. Speed is the primary selection pressure.
+
+A system built cooperatively does not face that pressure. If all major actors are
+in the coalition, there is no ``being overtaken.'' There is time to:
+\begin{itemize}[leftmargin=1.6em,itemsep=4pt]
+  \item Build alignment and interpretability in from the start, rather than
+  bolting it on.
+  \item Run extensive testing and red-teaming without fear of a deadline.
+  \item Implement governance, transparency, and benefit-sharing mechanisms.
+  \item Move deliberately rather than at the speed of fear.
+\end{itemize}
+
+A cooperative system can be built \emph{right} because there is no race penalty
+for taking the time.
+
+\subsection{The bottleneck: we know what it is, and we can solve it}
+
+Until now, the reason planetary-scale cooperation has seemed impractical is
+physical. Moving neural network activations between distant compute sites is
+slow (hundreds of milliseconds of fiber latency plus electronic switching delay)
+and energy-intensive (the data-movement overhead dominates the arithmetic). This
+makes a single global system infeasible.
+
+That bottleneck is now solvable. The solution is in Section~\ref{sec:bottleneck}.
+With it solved, cooperative global compute pooling becomes not just possible but
+pragmatic.
+
+% ======================================================================
+\section{The Bottleneck: Data Movement, and How to Remove It}
+\label{sec:bottleneck}
+
+\subsection{Why data movement is the constraint}
+
+In training or inference on large models, the limiting factor is not
+computation---we have plenty of compute, and it is cheap. The limiting factor is
+moving activations between compute nodes. For a distributed system spanning
+continents:
+\begin{itemize}[leftmargin=1.6em,itemsep=4pt]
+  \item \textbf{Latency.} Electronic packet-switched networks impose 150~ms of
+  fiber propagation plus 200--250~ms of switching/queueing overhead. For
+  distributed inference (where model layers are partitioned across sites), this
+  becomes a hard constraint.
+  \item \textbf{Energy.} Moving a bit across a data center via electronic
+  switching costs roughly \SI{1}{pJ}. For a petabyte-scale inference fleet,
+  this dominates the total energy budget. The compute itself is almost free by
+  comparison.
+\end{itemize}
+
+\noindent These constraints prevent the kind of planetary-scale compute pooling that would
+make cooperation obviously efficient.
+
+\subsection{The core idea: optical transport}
+
+Fiber-optic cables already span the planet---roughly \SI{10e6}{km} of submarine
+fiber, much of it dark (underutilized). Dense wavelength-division multiplexing
+(WDM) routinely carries 50--400 independent signals per fiber, each at 10--100~Gbps.
+
+The idea is simple: instead of converting activations to electronic packets,
+routing them electronically, and converting back to optical, encode them
+\emph{directly as optical signals} and route them by wavelength. This yields:
+
+\begin{itemize}[leftmargin=1.6em,itemsep=4pt]
+  \item \textbf{Energy reduction:} Optical transport costs roughly \SI{0.01}{pJ/bit}.
+  A \(100\times\) improvement in the dominant energy cost of global compute pooling.
+  \item \textbf{Latency reduction:} Eliminate electronic switching. Fiber
+  propagation is immutable (\SI{30}{ms} intercontinental), but switching overhead
+  vanishes. Single-hop latency drops from \(\sim400\) ms to \(\sim30\) ms.
+  \item \textbf{Practical feasibility:} Passive optical routing requires no
+  per-signal active electronics. Wavelength demultiplexers are simple, proven,
+  and cheap. This is not a laboratory concept; it is deployed infrastructure.
+\end{itemize}
+
+This is not optical \emph{computing} (where photons do the arithmetic).
+Computation stays electronic at each node. Only \emph{transport} is optical---a
+clean, modular separation that avoids the precision and scalability challenges
+of analog photonic compute while capturing the energy and latency wins of
+eliminating electronic switching.
+
+% ======================================================================
+\section{What It Would Look Like: Technical Architecture}
+\label{sec:tech}
+
+\subsection{System overview}
+
+At each regional hub:
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+  \item Inference produces 16-bit activations (electronic).
+  \item Electro-optic modulators encode activations as intensity-modulated
+  \SI{1550}{nm} light.
+  \item A wavelength multiplexer combines 50--100 wavelengths onto fiber.
+  \item Signals propagate through existing submarine and terrestrial cables.
+  \item Erbium-doped fiber amplifiers (EDFAs) maintain signal power every
+  \(\sim\!80\) km.
+  \item At the destination, a demultiplexer, photodiodes, and 16-bit ADCs
+  recover activations for the next layer.
+  \item Electronic inference continues locally.
+\end{enumerate}
+
+\noindent The entire system ``lives'' in the electronic domain at each node. Optics is
+purely transport.
+
+\subsection{Signal representation and precision}
+
+Activations are quantized to 16-bit unsigned integers. Modern neural networks
+tolerate 8-bit (and often 4-bit) inference with $<1\%$ accuracy loss. Analysis of
+the signal path shows effective precision of \(\sim\!13\)--14 bits after
+quantization and accumulated noise---a comfortable margin.
+
+\subsection{Long-haul transport and feasibility}
+
+For a representative trans-Atlantic path (\(\sim\!6000\) km):
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Fiber attenuation: \(\sim\!0.2\) dB/km (standard telecom fiber).
+  \item Amplifier spacing: EDFAs every \(\sim\!80\) km (\(\sim\!75\) spans total).
+  \item Noise figure: \(\sim\!4\)--5 dB per amplifier; accumulated noise floor
+  \(\sim\!-40\) dBm.
+  \item Signal budget: transmit power \SI{+0}{dBm}; losses and gains balance
+  to receiver sensitivity \SI{-20}{dBm}, with \SI{+6}{dB} margin for aging and
+  drift.
+  \item Propagation delay: \SI{30}{ms} one-way (speed of light in silica,
+  irreducible).
+  \item Channel isolation: WDM channels spaced at \SI{100}{GHz} (\(\sim\!0.4\) nm);
+  adjacent-channel crosstalk $<-30$ dB (standard in telecom).
+\end{itemize}
+
+\noindent \textbf{Conclusion}: The signal budget is achievable with commercial-grade
+components. No new physics required. No unsolved engineering problems.
+
+\subsection{Wavelength routing and control}
+
+Each datacenter pair is assigned a dedicated set of wavelengths. Activations for
+a specific destination are encoded onto those wavelengths; at intermediate hubs,
+passive optical add-drop multiplexers (OADMs) drop local traffic and pass through
+to the next hop. A software-defined networking (SDN) controller manages
+wavelength allocation and failover. Wavelengths are reused across geographically
+disjoint paths (reuse factor \(\sim\!2\)--3$\times$).
+
+A 10-hub global network needs \(\sim\!20\)--30 fiber pairs and 200--300 distinct
+wavelengths. Modern WDM systems operate 400$+$ wavelengths; we use \(\sim\!50\)--75\% of
+available capacity, leaving headroom for growth.
+
+\subsection{Clock synchronization}
+
+All nodes synchronize to a global reference (GPS-disciplined oscillator at major
+hubs, refined by IEEE 1588v2 Precision Time Protocol over the optical network
+itself). Achieves \(\pm\!10\) ns relative jitter---routine in telecom
+infrastructure, requiring no new technology.
+
+\subsection{Latency breakdown}
+
+For a single intercontinental hop (US East Coast $\leftrightarrow$ Europe):
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Inference computation: \(\sim\!1\)--10 \(\mu\)s.
+  \item Encoding (EOM + launch): \(\sim\!1\)--2 \(\mu\)s.
+  \item Fiber propagation: \(\sim\!30\) ms (immutable).
+  \item Reception (demux + photodetection + ADC): \(\sim\!1\)--2 \(\mu\)s.
+  \item \textbf{Total}: \(\sim\!31\) ms.
+\end{itemize}
+
+\noindent For comparison, electronic inter-datacenter routing: \(\sim\!150\) ms fiber +
+\(\sim\!200\)--250 ms switching/queueing = \(\sim\!350\)--400 ms. \textbf{A 10--13$\times$
+improvement.}
+
+For multi-hop distributed inference (three regions, three hops): \(\sim\!110\) ms
+round-trip, making cross-continental model parallelism practical for batch and
+many interactive workloads.
+
+\subsection{Energy efficiency}
+
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Electronic inter-datacenter communication: \(\sim\!1\) pJ/bit.
+  \item Optical transport: \(\sim\!0.01\) pJ/bit.
+  \item For a large inference fleet (100M requests/day, 1M activations/request):
+  reduces annual data-movement energy from \(\sim\!3.3\) GWh to \(\sim\!33\) MWh.
+  \item As a fraction of total datacenter energy (compute + storage + cooling):
+  saves \(\sim\!20\)--30\% under full deployment.
+\end{itemize}
+
+\subsection{Throughput}
+
+Per wavelength: 16 Gbps (1 GHz clock $\times$ 16 bits). 50 wavelengths per fiber
+pair: \(\sim\!800\) Gbps, or \(\sim\!50\)M activations/sec. A 10-pair global network
+supports \(\sim\!500\)M activations/sec, sufficient for hundreds of thousands of
+concurrent inferences.
+
+% ======================================================================
+% ======================================================================
+\section{Technology Readiness: No Breakthroughs Needed}
+\label{sec:trl}
+
+Every component of this system already exists, either as a deployed commercial
+product or as a mature research prototype:
+
+\begin{description}[leftmargin=1.6em,itemsep=3pt]
+  \item[Tier 1 \textemdash{} Off-the-shelf.] WDM infrastructure, 1550 nm fiber,
+  EDFA amplifiers, Mach--Zehnder electro-optic modulators, photodiodes,
+  transimpedance amplifiers, 16-bit ADCs, passive multiplexers/demultiplexers.
+  Buyable today; suitable for a proof-of-concept testbed immediately.
+  
+  \item[Tier 2 \textemdash{} Emerging, needs optimization.] Cost and yield scaling of
+  silicon photonic integrated circuits (10k$+$ channels already demonstrated in
+  research labs). Monolithic integrated receivers (photodiode + TIA + ADC on one
+  chip). Network-wide synchronization at \(\pm\!10\) ns. These are chip design
+  and systems-integration problems, \emph{not} physics gaps. Development time:
+  18--24 months with focused effort.
+  
+  \item[Tier 3 \textemdash{} Systems integration.] End-to-end protocol specification,
+  wavelength-allocation control plane, fault detection and automatic failover,
+  hardware/software co-design for latency guarantees. Non-trivial engineering,
+  well within reach of a focused consortium with experience in distributed systems.
+\end{description}
+
+\noindent A Phase~1 trans-Atlantic testbed is estimated at 18--24 months of focused
+engineering, with costs dominated by photonic-chip fabrication runs rather than
+research. The barriers are organizational and economic, not scientific.
+
+% ======================================================================
+\section{How to Get There: A Phased Roadmap}
+\label{sec:roadmap}
+
+\subsection{Phase 1: Trans-Atlantic Proof of Concept (Years 1--3, \$35--50M)}
+
+\textbf{Objective:} Demonstrate end-to-end optical activation transport at scale.
+
+\textbf{Scope:}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item One leased dark-fiber pair on existing submarine cable (US East Coast
+  $\leftrightarrow$ Europe).
+  \item Two major datacenters (e.g., Virginia and Amsterdam).
+  \item 10,000 input channels; 4,000 output channels (initial).
+  \item Inference workload: distributed layers of a GPT-3 scale model
+  (\(\sim\!175\)B parameters).
+  \item Continuous operation: 6--12 months.
+\end{itemize}
+
+\textbf{Milestones:}
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Months 1--6: Subsystem design \& procurement.}
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item Procure and characterize lasers, modulators, detectors.
+      \item Validate signal budget on lab testbed (\(\sim\!100\) m fiber).
+      \item Finalize clock synchronization protocol.
+    \end{itemize}
+  
+  \item \textbf{Months 6--12: System integration.}
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item Design and fabricate silicon photonic chip (10k channels).
+      \item Integrate transceiver modules (lasers, EOMs, photodiodes, ADCs).
+      \item Secure fiber connection to existing submarine cable landing station.
+      \item Build SDN control plane for wavelength allocation.
+    \end{itemize}
+  
+  \item \textbf{Months 12--18: Deployment \& characterization.}
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item Install hardware at both datacenters.
+      \item Tune optical amplifiers, wavelength routing, synchronization.
+      \item Run inference benchmarks: measure latency, throughput, bit-error rates.
+      \item Validate energy reduction against electronic baseline.
+    \end{itemize}
+  
+  \item \textbf{Months 18--24: Scaling \& optimization.}
+    \begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+      \item Scale from 10k to 100k input channels (via additional wavelengths or higher
+      modulation rates).
+      \item Optimize for realistic inference patterns.
+      \item Publish results; iterate design for Phase~2.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Cost breakdown (\$35--50M):}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Photonic chip design \& fabrication (2 runs): \$10M
+  \item Transceiver hardware (lasers, EOMs, detectors, ADCs): \$5M
+  \item Fiber lease \& amplifier infrastructure (5 years): \$8--10M
+  \item Engineering labor (50 FTE over 3 years): \$12--15M
+  \item Testing, characterization, contingency: \$3--5M
+\end{itemize}
+
+\textbf{Success criteria:}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Sub-50 ms inter-datacenter activation transport latency
+  \item $<1\%$ bit-error rate
+  \item Demonstrated 50--100$\times$ energy reduction for interconnect vs.\ electronic baseline
+  \item Sustained operation $>6$ months without significant degradation
+  \item Integration with standard ML frameworks (PyTorch, JAX) demonstrated
+  \item Published peer-reviewed results
+\end{itemize}
+
+\textbf{Risk level: Low.} Proven telecom technology; no new physics; existing components.
+
+\subsection{Phase 2: Regional Hub Deployment (Years 4--6, \$150--200M)}
+
+\textbf{Objective:} Extend to three regional hubs with full mesh connectivity and
+production-grade reliability.
+
+\textbf{Scope:}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Three to four datacenters (US, Europe, Asia-Pacific) in partial mesh.
+  \item Three fiber pairs (US $\leftrightarrow$ Europe, US $\leftrightarrow$ APAC,
+  Europe $\leftrightarrow$ APAC).
+  \item 100k--400k active input channels per hub.
+  \item Workload: full-model inference and distributed training on 500B--1T
+  parameter models.
+  \item Automatic failover on fiber cut; multi-hop routing.
+\end{itemize}
+
+\textbf{New challenges addressed:}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Multi-hop routing and wavelength reallocation.
+  \item Automatic detection and failover (recovery time $<1$ second).
+  \item Integration with existing cloud platforms (AWS, GCP, Azure).
+  \item Regulatory compliance (GDPR, data residency laws via regional gateways).
+\end{itemize}
+
+\textbf{Cost breakdown (\$150--200M):}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Additional optical infrastructure (2 more hubs, 2 more fiber pairs): \$80--100M
+  \item Upgraded transceivers \& control systems: \$30--40M
+  \item Integration with cloud platforms: \$20--30M
+  \item Labor \& contingency: \$20--30M
+\end{itemize}
+
+\textbf{Success criteria:}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Stable multi-hop routing with $<100$ ms latency for any source--destination pair
+  \item Automatic failover on fiber cut: recovery time $<1$ second, no inference loss
+  \item Support for 10M$+$ concurrent inferences
+  \item Commercial pricing model defined (\$/Tbps-month)
+  \item Open standards and reference implementation published
+\end{itemize}
+
+\textbf{Risk level: Moderate.} Requires coordination and multilateral standardization.
+
+\subsection{Phase 3: Global Deployment (Years 7--10, \$700M--1.5B)}
+
+\textbf{Objective:} Extend to 10+ regional hubs worldwide; become the default
+infrastructure for global AI compute pooling.
+
+\textbf{Scope:}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Global fiber network with 10--15 datacenters across all continents.
+  \item Millions of active neurons per hub.
+  \item Workload: frontier models (10T$+$ parameters), multi-modal inference,
+  scientific workloads.
+\end{itemize}
+
+\textbf{Cost breakdown (\$700M--1.5B):}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item New regional hubs \& fiber leases: \$400--700M
+  \item Control plane, optimization, machine-learning routing: \$100--200M
+  \item Integration with AI frameworks, regulatory compliance: \$150--300M
+  \item Labor, testing, contingency: \$50--100M
+\end{itemize}
+
+\textbf{Projected benefits (by 2035):}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Power savings: (200 GW baseline) $-$ (40 GW with optical) \(=\) 160 GW reduction
+  (assumes 50\% adoption). Annual savings: \(\sim\!\$70\)B at typical electricity rates.
+  \item Capital cost amortization: \(\sim\!\$3\)--5B/year over participating
+  organizations.
+  \item \textbf{Net annual benefit: \(\sim\!\$65\)B/year.}
+\end{itemize}
+
+\textbf{Success criteria:}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item Majority of global AI inference running on photonic infrastructure
+  \item $<20$ ms latency for any datacenter pair
+  \item Petabyte-scale daily activation transport
+  \item Carbon footprint reduction of 50\% for AI compute
+\end{itemize}
+
+\textbf{Risk level: Geopolitical.} Manageable with government backing and
+forward-compatible regional-fabric design.
+
+% ======================================================================
+\section{Why Cooperation Must Be Robust: Preventing Capture and Defection}
+\label{sec:robust}
+
+The infrastructure enables cooperation, but it must be designed so that
+cooperation remains stable even under stress. Two scenarios matter most:
+
+\subsection{Scenario 1: A participant attempts to defect or capture}
+
+\textbf{The risk:} A major participant tries to seize control of the system or
+unilaterally advance its own interests at others' expense.
+
+\textbf{The mitigation:}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Physical distribution.} The system spans multiple jurisdictions
+  and continents. No single entity controls more than a fraction of it.
+  \item \textbf{Operational interdependence.} Running the system requires
+  active, continuous cooperation from all major participants. If any exit or
+  defect, capability degrades for all.
+  \item \textbf{Verifiable routing.} Optical transport chokepoints are physical
+  and auditable. Tampering with wavelength allocation or traffic patterns is
+  detectable as signal loss or routing anomalies. Hidden behavior is impossible.
+  \item \textbf{Governance structure.} Decisions on capacity allocation,
+  maintenance, and upgrades require consensus or supermajority voting, not
+  unilateral control.
+\end{itemize}
+
+\subsection{Scenario 2: A hostile actor builds a competing system}
+
+\textbf{The risk:} An actor outside the coalition (a rogue lab, a captured
+state, a misaligned actor) unilaterally defects and builds its own hostile AI,
+attempting to achieve a decisive advantage.
+
+\textbf{The mitigation:}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Pooled capability.} A coalitional system is, by definition, more
+  capable than any single actor can build. A defector faces an opponent that is
+  stronger and has more compute.
+  \item \textbf{Distributed resilience.} The coalitional system survives any
+  single site being compromised or attacked. A defector's system is typically
+  more fragile.
+  \item \textbf{Speed.} The pooled effort can respond faster to security
+  threats, add defensive measures, or allocate compute to counteracting the
+  hostile system.
+  \item \textbf{Legitimacy and coordination.} A broadly legitimate, multi-party
+  system can mobilize diplomatic, legal, and technical responses to a threat
+  that a single actor cannot.
+\end{itemize}
+
+\noindent In both scenarios, the system's power comes from being \emph{cooperative}
+in fact, not just by design. A participant defecting loses access to the pooled
+compute and all the benefits cooperation provides. That is the enforcement
+mechanism.
+
+% ======================================================================
+\section{What This Is Not: Honest Limitations}
+\label{sec:limits}
+
+\subsection{This is not a solution to alignment}
+
+The infrastructure enables cooperation on building AI. It does nothing to make
+models themselves safe, interpretable, or aligned. The hard problems of technical
+AI alignment---mesa-optimization, deceptive alignment, specification gaming,
+out-of-distribution robustness---remain exactly as hard as before. What the
+infrastructure does is provide time and institutional structure within which that
+work can proceed without race pressure.
+
+\subsection{Efficiency is dual-use}
+
+A 100$\times$ improvement in interconnect energy could accelerate AI scaling
+rather than fund safety work. This paper proposes that the efficiency dividend
+be captured for broader benefit---through governance mechanisms, benefit-sharing
+commitments, and conscious choice about what problems to solve. But without that
+governance, efficiency alone could make things worse.
+
+\subsection{Shared infrastructure can become a shared chokepoint}
+
+A unified global system with a single optical backbone could, if captured or
+misgovernedy, become the ultimate centralization of power. The distributed
+design, the verifiable routing, and the governance mechanisms are guards against
+this. They are not guarantees. Keeping the system safe requires ongoing vigilance
+and broad participation.
+
+% ======================================================================
+\section{Who This Is For: The Call to Action}
+\label{sec:calls}
+
+\subsection{For researchers and builders in AI, photonics, and systems}
+
+You are the people who can make this real. We are asking you to:
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Evaluate the feasibility.} Read the architecture, run the
+  numbers, identify the real gaps. Where are we wrong? What have we missed?
+  \item \textbf{Publish and open-source.} Design silicon-photonic reference
+  implementations. Publish control-plane protocols. Build testbeds. Make this a
+  public technical conversation, not a closed project.
+  \item \textbf{Run Phase~1.} If the architecture is sound, the next step is
+  experimental validation. Form a team. Get funding. Build it.
+\end{itemize}
+
+\subsection{For institutions that fund research (government, foundations, venture)}
+
+You control the resources. We ask you to:
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Treat shared AI infrastructure as strategic.} Just as the early
+  internet and GPS were government-backed public goods, a planetary-scale AI
+  substrate is a public good worth funding.
+  \item \textbf{Co-fund Phase~1.} \$35--50M is small by the standards of AI
+  development, and the returns---a demonstration that cooperation is feasible, a
+  technology path that others can then scale---are enormous.
+  \item \textbf{Support openness.} Fund the publication, the open-source
+  implementation, and the intellectual commons that will make this a shared
+  project, not a proprietary one.
+\end{itemize}
+
+\subsection{For AI labs and companies}
+
+You have the most to gain and the most to lose. We ask you to:
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Do the math.} Compute the cost of racing. Compute the cost of
+  pooling. Compute the capability you could build cooperatively. Then ask
+  yourself: which is better for your business, your people, and your role in
+  the world?
+  \item \textbf{Form a consortium.} Announce a commitment to cooperation on
+  shared infrastructure. The first mover gets outsized credit; the second mover
+  looks like they were forced into it.
+  \item \textbf{Open the technical work.} You do not need to give away your
+  models or your data. But you can contribute to the photonic fabric, the
+  protocols, and the standards that everyone will eventually use anyway. Get
+  ahead of the curve.
+\end{itemize}
+
+\subsection{For policymakers and diplomats}
+
+You set the rules of the
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt] \item \textbf{Recognize the opportunity.} A cooperatively built global AI system is not a loss of sovereignty; it is a multiplication of it. Each participant retains full control of its own compute and data. What is shared is transport and infrastructure---the pipes, not the content. \item \textbf{Enable cooperation.} Negotiate fiber-access agreements. Work with cable consortiums to unlock dark fiber for AI. Remove regulatory barriers to shared infrastructure. \item \textbf{Govern transparently.} The governance of the system itself should be transparent, multi-stakeholder, and legitimately representative. Use this as a model for how to govern other powerful technologies. \end{itemize}
+\subsection{For everyone else}
+
+You care about the future. You want AI to solve hard problems rather than
+exacerbate them. You want a world where capability is broadly distributed rather
+than hoarded. \textbf{Talk about this.} Demand that the actors above treat it
+seriously. Make it clear that cooperation is what you want to see, that you will
+support it, and that you will hold builders accountable if they choose to race
+instead.
+
+% ======================================================================
+\section{The Broader Point}
+\label{sec:broader}
+
+This proposal is about more than infrastructure. It is about \emph{choice}.
+
+Right now, the development of powerful AI is being decided by default---through
+competition, through the logic of markets and geopolitical rivalry, through the
+dynamics of venture capital and research funding. That may or may not produce
+good outcomes. We will find out only after the fact.
+
+This proposal asks: what if we chose instead? What if, while we still can, we
+decided together what we want AI to be---not hostile, not captured, not
+optimizing for the private benefit of a few actors, but genuinely useful,
+broadly distributed, and built for the problems that matter?
+
+The photonic network is not the point. The point is that it makes choice
+possible. With the data-movement bottleneck removed, cooperation becomes not a
+nice idea but a practical engineering path. One that is faster, more capable,
+less wasteful, and more useful than the alternatives.
+
+We are asking you to make that choice deliberately. To pool resources, to work
+openly, to govern fairly, and to build something together that no one could
+build alone. Not because it is virtuous---though it is---but because it is the
+best engineering, the fastest path to capability, and the most likely to
+actually help.
+
+The window for this choice is closing. In a few years, the systems being built
+will be powerful enough that they become hard to redirect. The institutions will
+be locked in. The geopolitical positions will be calcified. But right now---today,
+this year, in the next few years---it is still possible to choose.
+
+We invite you to choose together.
+
+% ======================================================================
+\section*{Acknowledgments}
+
+This manuscript benefited from substantial drafting, synthesis, architectural
+framing, and technical modeling assistance from a large language model (Anthropic
+Claude 4.5 Haiku). The human author is responsible for all claims, framing,
+strategic positioning, and errors. Feedback, criticism, and collaboration are
+explicitly welcomed.
+
+The empirical and philosophical foundations for the cooperative approach were
+developed in parallel work, including the Empirical Pascal's Wager framework and
+related AI governance analysis by the author.
+
+% ======================================================================
+\section*{Author Contributions}
+
+[Author Name] conceived the proposal, framed the arguments for a cooperative
+approach, and oversaw all drafting and revision. Technical architecture and
+performance modeling were developed collaboratively with AI assistance. This is
+a working pre-print intended for circulation, feedback, and critique from the
+Georgia Tech AI Safety Initiative, the photonics and distributed-systems
+research community, and potential consortium partners.
+
+% ======================================================================
+\section*{License and Availability}
+
+This work is released under the Creative Commons Attribution 4.0 International
+License (CC-BY-4.0). Source, revision history, and collaboration materials are
+maintained on GitHub at [repository URL, to be filled in].
+
+% ======================================================================
+\begin{thebibliography}{99}
+
+\bibitem{armstrong2016racing}
+S.~Armstrong, N.~Bostrom, and C.~Shulman,
+\newblock ``Racing to the Precipice: A Model of Artificial Intelligence Development,''
+\newblock \emph{AI \& Society}, vol.~31, no.~2, pp.~201--206, 2016.
+
+\bibitem{dafoe2018agenda}
+A.~Dafoe,
+\newblock ``AI Governance: A Research Agenda,''
+\newblock Centre for the Governance of AI, Future of Humanity Institute, University of Oxford, 2018.
+
+\bibitem{openai2018charter}
+OpenAI,
+\newblock ``OpenAI Charter,''
+\newblock \url{https://openai.com/charter/}, 2018.
+
+\bibitem{bostrom2014superintelligence}
+N.~Bostrom,
+\newblock \emph{Superintelligence: Paths, Dangers, Strategies},
+\newblock Oxford University Press, 2014.
+
+\bibitem{okeefe2020windfall}
+C.~O'Keefe, T.~Anderljung, and S.~Legg,
+\newblock ``Should Artificial Intelligence Governance be Centralised? Design Lessons from History,''
+\newblock In \emph{Proceedings of the AAAI/ACM Conference on AI, Ethics, and Society}, 2020.
+
+\bibitem{amodei2024grace}
+D.~Amodei and D.~Amodei,
+\newblock ``Machines of Loving Grace,''
+\newblock OpenAI Blog, 2024.
+
+\bibitem{shen2017deep}
+Y.~Shen, N.~C.~Harris, S.~Skirlo, M.~Prabhu, T.~Baehr-Jones, M.~Hochberg, X.~Sun, S.~Zhao, H.~Larochelle, D.~Englund, and M.~Soljavc,
+\newblock ``Deep Learning with Coherent Nanophotonic Circuits,''
+\newblock \emph{Nature Photonics}, vol.~11, pp.~441--446, 2017.
+
+\bibitem{wetzstein2020inference}
+G.~Wetzstein, A.~Ozcan, S.~Gigan, S.~Fan, D.~Englund, M.~Soljavc, C.~Denz, D.~A.~B.~Miller, and D.~Psaltis,
+\newblock ``Inference in Artificial Intelligence with Deep Optics and Photonics,''
+\newblock \emph{Nature}, vol.~588, pp.~39--47, 2020.
+
+\bibitem{feldmann2021parallel}
+J.~Feldmann, N.~Youngblood, M.~Karpov, et al.,
+\newblock ``Parallel Convolutional Processing Using an Integrated Photonic Tensor Core,''
+\newblock \emph{Nature}, vol.~589, pp.~52--58, 2021.
+
+\bibitem{patterson2021carbon}
+D.~Patterson, J.~Gonzalez, Q.~Le, C.~Liang, L.-M.~Munguia, D.~Rothchild, D.~So, M.~Texier, and J.~Dean,
+\newblock ``Carbon Emissions and Large Neural Network Training,''
+\newblock \emph{arXiv:2104.10350}, 2021.
+
+\bibitem{devries2023energy}
+A.~de Vries,
+\newblock ``The Growing Energy Footprint of Artificial Intelligence,''
+\newblock \emph{Joule}, vol.~7, no.~10, pp.~2191--2194, 2023.
+
+\bibitem{iea2024electricity}
+International Energy Agency,
+\newblock ``Electricity 2024: Analysis and Forecast to 2026,''
+\newblock IEA, Paris, 2024.
+
+\bibitem{sastry2024compute}
+G.~Sastry, L.~Heim, H.~Belfield, M.~Anderljung, M.~Brundage, et al.,
+\newblock ``Computing Power and the Governance of Artificial Intelligence,''
+\newblock \emph{arXiv:2402.08797}, 2024.
+
+\bibitem{brundage2020verifiable}
+M.~Brundage, S.~Avin, J.~Wang, H.~Belfield, et al.,
+\newblock ``Toward Trustworthy AI Development: Mechanisms for Supporting Verifiable Claims,''
+\newblock \emph{arXiv:2004.07213}, 2020.
+
+\bibitem{hausenloy2023magic}
+R.~Hausenloy, E.~Anderljung, and A.~Andersson,
+\newblock ``Multinational AGI Consortium (MAGIC),''
+\newblock \emph{Differential AI Governance}, 2023.
+
+\bibitem{achesonlilienthal1946}
+D.~E.~Acheson and B.~Lilienthal,
+\newblock ``A Report on the International Control of Atomic Energy,''
+\newblock U.S. Department of State, 1946.
+
+\bibitem{winzer2018optical}
+P.~J.~Winzer and D.~T.~Neilson,
+\newblock ``From Scaling Chaos to the Roadmap of Lightwave Communication,''
+\newblock \emph{Nature Photonics}, vol.~12, no.~6, pp.~303--314, 2018.
+
+\bibitem{telegeography2023submarine}
+TeleGeography,
+\newblock ``TeleGeography Submarine Cable Map,''
+\newblock \url{https://www2.telegeography.com/submarine-cable-faqs-frequently-asked-questions}, 2023.
+
+\end{thebibliography}
+
+\end{document}
